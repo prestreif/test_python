@@ -1,0 +1,76 @@
+4.1
+In [62]: NAT = "ip nat inside source list ACL interface FastEthernet0/1 overload"
+
+In [63]: NAT.replace("Fast", "Gigabit")
+Out[63]: 'ip nat inside source list ACL interface GigabitEthernet0/1 overload'
+4.2
+
+In [64]: MAC = 'AAAA:BBBB:CCCC'
+
+In [65]: MAC.replace(":", ".")
+Out[65]: 'AAAA.BBBB.CCCC'
+
+4.3
+
+In [66]: CONFIG = 'switchport trunk allowed vlan 1,3,10,20,30,100'
+In [71]: CONFIG.split()[-1].split(",")
+Out[71]: ['1', '3', '10', '20', '30', '100']
+
+4.4
+
+In [2]: command1 = set('switchport trunk allowed vlan 1,3,10,20,30,100'.split()[-1].split(","))
+
+In [3]: command2 = set('switchport trunk allowed vlan 1,3,100,200,300'.split()[-1].split(","))
+
+In [4]: list(command1 & command2)
+Out[4]: ['100', '3', '1']
+
+4.5
+
+VLANS = [10, 20, 30, 1, 2, 100, 10, 30, 3, 4, 10]
+In [10]: set(VLANS)
+Out[10]: {1, 2, 3, 4, 10, 20, 30, 100}
+
+In [11]: VLANS = list(set(VLANS))
+In [14]: VLANS.sort()
+
+In [15]: VLANS
+Out[15]: [1, 2, 3, 4, 10, 20, 30, 100]
+
+4.6
+
+In [52]: ospf_route = 'OSPF        10.0.24.0/24 [110/41] via 10.0.13.3, 3d18h, FastEthernet0/0'.split()
+
+In [53]: ospf_route
+Out[53]: 
+['OSPF',
+ '10.0.24.0/24',
+ '[110/41]',
+ 'via',
+ '10.0.13.3,',
+ '3d18h,',
+ 'FastEthernet0/0']
+
+In [54]: ospf_route[2] = ospf_route[2].strip('[]')
+
+In [55]: ospf_route.pop(3)
+Out[55]: 'via'
+
+
+In [98]: print("Protocol:{:>15}\nPrefix:{:>25}\nAD/Metric:{:>16}\nNext-Hop:{:>21}\nLast update:{:>14}\nOutbound Interface:{:>16}".format(*ospf_route))
+Protocol:           OSPF
+Prefix:             10.0.24.0/24
+AD/Metric:          110/41
+Next-Hop:           10.0.13.3,
+Last update:        3d18h,
+Outbound Interface: FastEthernet0/0
+
+
+4.7
+
+MAC = 'AAAA:BBBB:CCCC'.split(':')
+
+print("{:<25}{:<25}{:<25}".format(bin(int(MAC[0], 16)), bin(int(MAC[1], 16)), bin(int(MAC[2], 16))))
+0b1010101010101010       0b1011101110111011       0b1100110011001100   
+
+4.8
