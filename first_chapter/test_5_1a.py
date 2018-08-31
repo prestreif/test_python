@@ -1,9 +1,9 @@
 #!/usr/bin/env python3.6
 
-from sys import argv
+#from sys import argv
 
-#ip, pref = (input("Введите ip/iprefix: ")).split('/')
-ip, pref = argv[1].split('/')
+ip, pref = (input("Введите ip/iprefix: ")).split('/')
+#ip, pref = argv[1].split('/')
 
 ip = ip.split('.')
 
