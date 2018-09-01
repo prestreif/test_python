@@ -21,7 +21,7 @@ elif ip[0] == ip[1] ==  ip[2] == ip[3] == 255:
     print("ip => local broadcast")
 elif 239 >=  ip[0] >= 224:
     print("ip => multicast")
-elif 127 >= ip[0] >= 1:
+elif 223 >= ip[0] >= 1:
     print("ip => unicast")
 else:
     print("ip => unused")
