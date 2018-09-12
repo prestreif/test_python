@@ -4,6 +4,8 @@
 from draw_network_graph import *
 from task_11_1 import *
 from sys import argv
+from pprint import *
+
 
 '''
 Задание 11.2a
@@ -52,8 +54,9 @@ def create_dict_in_file(*in_files):
     for in_file in in_files:
         #print(in_file)
         #print(read_file(in_file))
-        dict_graph.update(read_file(in_file))
-    
+        dict_graph.update({key: val for key, val in read_file(in_file).items() if dict_graph.get(val) == None})
+   
     return dict_graph
 
 draw_topology(create_dict_in_file(*argv[1:]), "swg_11_2a")
+#pprint(create_dict_in_file(*argv[1:]))
