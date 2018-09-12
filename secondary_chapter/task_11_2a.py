@@ -1,4 +1,10 @@
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
+
+from draw_network_graph import *
+from task_11_1 import *
+from sys import argv
+
 '''
 Задание 11.2a
 
@@ -32,3 +38,22 @@
 > pip install graphviz
 
 '''
+
+def read_file(file_name):
+    with open(file_name, "r") as f:
+       return parse_cdp_neighbors(f.read())
+       #print(f.read())
+
+def create_dict_in_file(*in_files):
+    '''
+    Create dict for to file
+    '''
+    dict_graph = dict()
+    for in_file in in_files:
+        #print(in_file)
+        #print(read_file(in_file))
+        dict_graph.update(read_file(in_file))
+    
+    return dict_graph
+
+draw_topology(create_dict_in_file(*argv[1:]), "swg_11_2a")
