@@ -33,7 +33,14 @@ def parse_cdp_neighbors(in_str):
     Ограничение: Все задания надо выполнять используя только пройденные темы.
     """
 
-    in_line = in_str.strip().split('\n')   
-    return  {(in_line[0][0:in_line[0].find(">")], "".join(line.strip().split()[-2:])): (line.strip().split()[0], "".join(line.strip().split()[1:3])) for line in in_line[3:]}
+    in_line = list(val.strip() for val in in_str.strip().split('\n') if val.strip().startswith("R") or val.strip().startswith("SW"))
+    return  {
+            (in_line[0][0:in_line[0].find(">")], #the first part of the dictionary key, in first line in the text search name network device
+                "".join(line.strip().split()[1:3])): #the secondary of the part dictionary key, in other lines search Local Interface
+            (line.strip().split()[0], "".join(line.strip().split()[-2:])) #the value of the dictionary, serach in line first and last name and interface
+            for line in in_line[1:]}
 
+
+
+print(argv)
 print(parse_cdp_neighbors(argv[1]))
