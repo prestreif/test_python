@@ -34,5 +34,5 @@ from task_11_1 import *
 '''
 
 dict_cdp = parse_cdp_neighbors(argv[1])
-draw_topology(dict_cdp, "img_test")
+draw_topology(dict_cdp, "img_test.svg")
 
