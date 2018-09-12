@@ -59,4 +59,3 @@ def create_dict_in_file(*in_files):
     return dict_graph
 
 draw_topology(create_dict_in_file(*argv[1:]), "swg_11_2a")
-#pprint(create_dict_in_file(*argv[1:]))
