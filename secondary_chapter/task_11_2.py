@@ -1,4 +1,10 @@
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
+
+from sys import argv
+from draw_network_graph import *
+from task_11_1 import *
+
 '''
 Задание 11.2
 
@@ -26,3 +32,7 @@
 > pip install graphviz
 
 '''
+
+dict_cdp = parse_cdp_neighbors(argv[1])
+draw_topology(dict_cdp, "img_test")
+

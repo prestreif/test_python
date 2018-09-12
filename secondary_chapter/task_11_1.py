@@ -41,6 +41,6 @@ def parse_cdp_neighbors(in_str):
             for line in in_line[1:]}
 
 
-
-print(argv)
-print(parse_cdp_neighbors(argv[1]))
+if __name__ == '__main__':
+    print(argv)
+    print(parse_cdp_neighbors(argv[1]))
