@@ -3,7 +3,7 @@
 from sys import argv
 import subprocess
 import ipaddress
-import pprint
+import tabulate
 
 def ping(ip):
     '''
@@ -16,53 +16,67 @@ def ping(ip):
             stderr = subprocess.DEVNULL)
 
     if reply.returncode == 0:
-        return str(ip), True
+        return ip, True
     else:
-        return str(ip), False
+        return ip, False
 
 
-def ip_to_network(ip_addr, wild_card_pref):
+def ip_to_network(ip_addr, count_pref):
     '''
     return object ipaddress.ip_network
     '''
-    print(ip_addr + " " + str(32 - wild_card_pref))
-
+    #print(ip_addr + " " + str(count_pref))
     return ipaddress.ip_network(
             ".".join(str(str_i) for str_i in
                 list(
                     int(
-                        ("{:08b}{:08b}{:08b}{:08b}".format(*list(int(val) for val in ip_addr.split(".")))[:32-wild_card_pref] + "0" * wild_card_pref)[i:i+8],
+                        ("{:08b}{:08b}{:08b}{:08b}".format(*list(int(val) for val in ip_addr.split(".")))[:32-count_pref] + "0" * count_pref)[i:i+8],
                         2)
                     for i in range(0, 32, 8))
-                )
-        + "/" +  str(32 - wild_card_pref))
+                ) + "/" + str(32 - count_pref)
+            )
 
-def get_list_ip(ip_addr):
-    ip_addr = ip_addr.strip().split()
-    if len(ip_addr) > 1:
-        wild_card_pref = "{:08b}{:08b}{:08b}{:08b}".format(*list(int(val) for val in ip_addr[1].split(".")))[::-1].index("1")
-        ip_network = ip_to_network(ip_addr[0], wild_card_pref)
-    elif '/' in ip_addr[0]:
-        ip_addr = ip_addr[0].split("/")
-        ip_network = ip_to_network(ip_addr[0], 32 - int(ip_addr[1]))
+def parse_ip_str(ip_str):
+    list_ip = list()
+    if '-' in ip_str:
+        ip_str = ip_str.split('-')
+        start_ip = ip_str[0].split('.')[::-1]
+        end_ip = ip_str[1].split('.')[::-1]
+        end_ip = ".".join((end_ip + list(val for key, val in enumerate(start_ip) if not key < len(end_ip)))[::-1]) 
+        start_ip =  ipaddress.ip_address(".".join(start_ip[::-1]))
+        end_ip = ipaddress.ip_address(end_ip)
+        if start_ip > end_ip:
+            temp_ip = start_ip
+            start_ip = end_ip
+            end_ip = temp_ip
+        #print(str(ipaddress.ip_address(start_ip)) + " => " + str(ipaddress.ip_address(end_ip))) 
+        return list(str(ipaddress.ip_address(ip)) for ip in range(int(start_ip), int(end_ip) + 1))
     else:
-        ip_network = ip_to_network(ip_addr[0], 6)
+        return [ip_str]
 
-    return list(ip_network.hosts())
+
+def get_list_ip(in_ip_addr):
+    ip_addr = in_ip_addr.strip().split()
+    if len(ip_addr) > 1:
+        count_pref = "{:08b}{:08b}{:08b}{:08b}".format(*list(int(val) for val in ip_addr[1].split(".")))[::-1].index("1")
+        ip_network = ip_to_network(ip_addr[0], count_pref)
+        print(ip_network)
+    elif '/' in in_ip_addr:
+        ip_addr = in_ip_addr.split("/")
+        ip_network = ip_to_network(ip_addr[0], 32 - int(ip_addr[1]))
+        print(ip_network)
+    else:
+       return parse_ip_str(in_ip_addr)
+
+    return ip_network.hosts()
 
 def check_ip_addresses(*list_ip):
-    ip_list = {True: list(), False: list()}
-    i = 0;
-    max_i = len(list_ip)
+    #print(list_ip)
+    reply_list = {True: [], False: []}
     for ip in list_ip:
-        ip_reply = ping(ip)
-        ip_list[ip_reply[1]].append(ip_reply[0])
-        i+=1
-        print("Проверен {} из {}".format(i, max_i))
-    
-    pprint.pprint(ip_list)
-
-
-
+        i = ping(ip)
+        reply_list[i[1]].append(i[0])
+    print(tabulate.tabulate(reply_list, headers="keys"))
 
 check_ip_addresses(*get_list_ip(argv[1]))
+#parse_ip_str(argv[1])
