@@ -49,7 +49,8 @@ def complite_topology_cdp(dict_topology):
     dict_test = dict()
     for key, val in dict_topology.items():
         for sub_key, sub_val in val.items():
-            dict_test[(key, sub_key)] = tuple(*sub_val.items())
+            if not tuple(*sub_val.items()) in dict_test:
+                dict_test[(key, sub_key)] = tuple(*sub_val.items())
 
     pprint(dict_test)
     draw_topology(dict_test)
