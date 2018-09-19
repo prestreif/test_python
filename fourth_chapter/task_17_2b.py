@@ -1,4 +1,11 @@
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
+
+from sys import argv
+import glob
+import argparse
+from task_17_2a import *
+from pprint import pprint
 '''
 Задание 17.2b
 
@@ -29,3 +36,35 @@
 
 Не копировать код функции parse_sh_cdp_neighbors
 '''
+def generate_topology_from_cdp(list_of_files, save_to_file = True, topology_filename = "topology.yaml"):
+    if len(list_of_files) < 1:
+        print('*' * 30)
+        print("Не найдено файлов для вывода")
+        print('*' * 30)
+        return
+    else:
+        print('-' * 30)
+        print("Выбранные файлы: ", end='\n ')
+        print("\n ".join(list_of_files))
+        print("-" * 30)
+
+    dict_cdp = create_dict_cdp([parse_sh_cdp_neighbors(read_file(ifile)) for ifile in list_of_files])
+    
+    if save_to_file:
+        with open(topology_filename, "w") as f:
+            yaml.dump(dict_cdp, f)
+
+        print("Запись результата в файл => {}".format(topology_filename))
+
+    return dict_cdp
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description = "Парсер sh cdp neighbor")
+
+    parser.add_argument('regex_files', action="store", help="Регулярное вырожение для загрузки всех файлов")
+    parser.add_argument('-s', action="store", dest='save_to_file', help="[True|False] Сохранить в файл", default="True")
+    parser.add_argument('-f', action="store", dest='file_name', help="Название файла в который производится сохранение", default="topology.yaml")
+
+    args = parser.parse_args()
+    generate_topology_from_cdp(glob.glob(args.regex_files), args.save_to_file, args.file_name)

@@ -1,4 +1,14 @@
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
+
+import os.path
+from sys import argv
+from task_17_1 import read_file
+from task_17_2 import parse_sh_cdp_neighbors
+import glob
+from pprint import pprint
+import yaml
+
 '''
 Задание 17.2a
 
@@ -25,3 +35,15 @@
 
 Не копировать код функции parse_sh_cdp_neighbors
 '''
+
+def create_dict_cdp(list_dict):
+    dict_cdp = dict()
+    for idict in list_dict:
+        dict_cdp.update(idict)
+
+    return dict_cdp
+
+if __name__ == "__main__":
+    args = glob.glob('sh_cdp*.txt')
+    pprint(create_dict_cdp([parse_sh_cdp_neighbors(read_file(ifile)) for ifile in args]))
+

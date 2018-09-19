@@ -1,10 +1,12 @@
 #!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 
+
 import re
 from sys import argv
 from task_17_1 import *
 import argparse
+from pprint import pprint
 
 '''
 Задание 17.2
@@ -33,10 +35,12 @@ R6           Fa 0/2          143           R S I           2811       Fa 0/0
 '''
 
 def parse_sh_cdp_neighbors(output):
-    dict_neig = {re.search('(.*?)>sho?w? cdp ', output).group(1): None}
-    print(dict_neig)
-
-#list(re.search('(\S+)\s+(\S+\s\S+).*\s(\S+\s\S+)', val).groups() for val in re.sub('.*[^\d]\n', '',  str_file, re.DOTALL).strip().split('\n'))
+    return {
+            re.match('^(\S+?)>', output.strip()).group(1): (lambda rows: {row['local_intf']: 
+                {row['device']: row['port_id']}  for row in rows})([
+                    re.search('(?P<device>\S+)\s+(?P<local_intf>\S+\s\S+).*\s(?P<port_id>\S+\s\S+)', row).groupdict() 
+                    for row in re.sub('.*[^\d]\n', '',  output, re.DOTALL).strip().split('\n')])
+                }
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="parser show cdp neighbors")
@@ -45,5 +49,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    parse_sh_cdp_neighbors(read_file(args.file_name))
+    pprint(parse_sh_cdp_neighbors(read_file(args.file_name)))
     #print(read_file(args.file_name))
