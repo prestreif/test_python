@@ -1,0 +1,83 @@
+#!/usr/bin/env python3.6
+
+import pexpect
+from getpass import getpass, getuser
+from pprint import pprint
+import re
+import argparse
+
+
+
+def valid_end(line, stop_re):
+    '''
+    Функция проверяет соответсвует ли строка регулярному вырожению
+    valid_end(line, stop_re)
+        line    - первый параметр линия(строка)
+        stop_re - регулярное вырожение с которым происходит сравнение
+    Возвращает True если вырожение найденно
+    Возвращает False если вырожение не найденно
+    '''
+    return True if re.search(stop_re, line) else False
+
+def telnet_rstr(t, stop_re, exp = ['#', '>'], success_exp = 2):
+    '''
+    Функция считывает весь вывод до регулярного вырожения
+    telnet_rstr(t, stop_re, exp = ['#', '>'], success_exp = 2)
+        t           - обьект pexpect.spawn
+        stop_re     - регулярное вырожение, указывающее на конец вывода
+        exp         - срезы из вывода ['#', '>']
+        success_exp - после какой позиции, опреацию считать не успешной
+    '''
+    iD = t.expect(exp)
+    line = t.before.decode('utf-8') + exp[iD]
+    istr = ""
+    while not valid_end(line, stop_re):
+        istr = istr + line
+        iD = t.expect(exp)
+        line = t.before.decode('utf-8') + exp[iD]
+
+    return istr + line
+
+def telnet(ip, port, commands, LOGIN, PASSWD):
+    '''
+    фунция подключения по телнет
+    telnet(ip, port, commands, LOGIN, PASSWD)
+        ip          - IP ADDRESS удаленного сервера telnet
+        port        - PORT удаленного сервера telnet
+        commands    - Команды которые нужно выполнеить на удаленном сервере ['command1', 'commandN']
+        LOGIN       - Логин для авторизации на удаленном сервере telnet
+        PASSWD      - Пароль для авторизации на удаленном сервере telnet
+    '''
+    l_result = []
+    regex_host = '\r\n\s*\S+[#>]'
+    with pexpect.spawn("telnet {} {}".format(ip, port)) as t:
+        telnet_rstr(t, '[Ll]ogin.*:', [':'])
+        t.sendline(LOGIN)
+        telnet_rstr(t, '[Pp]ass.*:', [':'])
+        t.sendline(PASSWD)
+        telnet_rstr(t, regex_host)
+        for command in commands:
+            t.sendline(command)
+            l_result.append(telnet_rstr(t, regex_host).split('\r\n'))
+
+
+    l_result = [result for line in l_result for result in line[1:-1]]
+    pprint(l_result)
+
+
+if __name__ == "__main__":
+    cmd = argparse.ArgumentParser(description = "Скрипт для подключения по telnet")
+
+    cmd.add_argument('-ip', action="store", dest="IP", help="IP ADDRESS удаленного сервера telnet")
+    cmd.add_argument('-P', action="store", dest="PORT", default=23, type=int, help="PORT удаленного сервера telnet")
+    cmd.add_argument('-CMD', action="store", dest="CMD", help="Команда для выполнения на сервере telnet")
+    cmd.add_argument('-CMDS', action="store", dest="CMDS", help="Команды для выполнения на сервере telnet, формат = 'command1,command2,,,commandN'")
+    cmd.add_argument('-FIP', action="store", dest="FILE", help="Файл со списком серверов для подключения, в формате yaml")
+    cmd.add_argument('-FCMD', action="store", dest="FILE", help="Файл со списком команд для выполнения на серверe, в формате yaml")
+
+    args = cmd.parse_args()
+    print(args)
+
+    LOGIN  = input("Введите логин: ") 
+    PASSWD = getpass(prompt="Введите пароль: ")
+    telnet('192.168.30.37', 23, ['show hostname', 'show version', 'show serial'], LOGIN, PASSWD)

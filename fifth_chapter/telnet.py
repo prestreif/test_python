@@ -2,48 +2,31 @@
 
 import pexpect
 from getpass import getpass
-from pprint import pprint
-import re
-import argparse
+
+base_tel = ['\r\n\s*\S#', '\r\n\s*\S>']
+dev_tel = {'luminato': "Login incorrect"}
 
 
-
-def valid_end(line, stop_re):
-    return True if re.search(stop_re, line) else False
-
-def telnet_rstr(t, stop_re, exp = ['#', '>']):
-    iD = t.expect(exp)
-    line = t.before.decode('utf-8') + exp[iD]
-    istr = ""
-    while not valid_end(line, stop_re):
-        istr = istr + line
-        iD = t.expect(exp)
-        line = t.before.decode('utf-8') + exp[iD]
-
-    print('-' * 30)
-    return istr + line
-
-def telnet(ip, port, command, LOGIN, PASSWD):
-    regex_host = '\r\n\s*\S+[#>]'
+def telnet(ip, port, login, passwd, commands, exp, exp_falure=2):
     with pexpect.spawn("telnet {} {}".format(ip, port)) as t:
-        print(telnet_rstr(t, '[Ll]ogin.*:', [':']))
-        t.sendline(LOGIN)
-        print(telnet_rstr(t, '[Pp]ass.*:', [':']))
-        t.sendline(PASSWD)
-        print(telnet_rstr(t, regex_host))
-        t.sendline(command)
+        try:
+            t.expect('[Ll]ogin\s*a?s?:')
+            print('Ввод логина: {}'.format(login))
+            t.sendline(login)
+            t.expect('[Pp]assword:')
+            print("Ввод пароля")
+            t.sendline(passwd)
+            iD = t.expect('\r\n *\w#')
+            print("Совпало вырожение: {}".format(exp[iD]))
+            t.sendline(commands)
+            iD = t.expect(exp)
+            print("Совпало вырожение: {}".format(exp[iD]))
+            print("Вывод комманды {}:".format(commands))
+            print(t.before.decode('utf-8'))
 
-        lines = telnet_rstr(t, regex_host).split('\r\n')
-
-        for key, line in enumerate(lines):
-            print(str(key) + ": " + line)
-        
-
+        except pexpect.TIMEOUT:
+            print("Время ожидания отклюика от сервера истекло")
+            return
 
 if __name__ == "__main__":
-    
-
-    print('login: ', end='')
-    LOGIN = input()
-    PASSWD = getpass()
-    telnet('192.168.30.37', 23, 'sh all-command', LOGIN, PASSWD)
+    telnet("192.168.30.37", "23", input("Введите логин: "), getpass(prompt='Введите пароль: '), "sh ver", base_tel) 
